@@ -5,6 +5,7 @@
 #include<chrono>
 #include<atlimage.h>
 #include "Player.h"
+#include"BulletControl.h"
 #pragma comment (lib, "msimg32.lib")
 using namespace std;
 HINSTANCE g_hInst;
@@ -51,17 +52,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 
 int Score = 0;
 PLAYER player;
+vector<vector<Board>> boards;
+RECT GameRect;
+BulletControl bulletControl;
 LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC hDC, mDC;
 	HBITMAP hBitmap;
 	static RECT clientrect;
-	static RECT GameRect;
-	static RECT playerRect;
-	static vector<vector<Board>> boards;
-	static int xDiv = 10;
-	static int yDiv = 10;
 	
+	static RECT playerRect;
+	
+	static int xDiv = 11;
+	static int yDiv = 11;
+	static RECT turnWhiterect;
+	static RECT temprect;
 	HPEN hPen, oldPen;
 	HBRUSH hBrush, oldBrush;
 	HFONT hFont, oldFont;
@@ -76,14 +81,26 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		SetTimer(hWnd, 1, 30, (TIMERPROC)ScoreFunc);
 		SetTimer(hWnd, 2, 10, (TIMERPROC)rotateFunc);
-		SetTimer(hWnd, 3, 1, (TIMERPROC)moveFunc);
+		SetTimer(hWnd, 3, 0.000001, (TIMERPROC)moveFunc);
 		GetClientRect(hWnd, &clientrect);
 		GameRect = RECT{ 0,0,700,700 };
-
+		turnWhiterect = RECT{ 0,0,140,140 };
+		
 		OffsetRect(&GameRect, (clientrect.right - 700) / 2, 120);
 		setRects(GameRect, boards, xDiv, yDiv, playerRect);
-
+		
 		player.setRect(playerRect);
+		OffsetRect(&turnWhiterect, player.rect.left - (playerRect.right - playerRect.left), player.rect.top - 25);
+		for (size_t i = 0; i < boards.size(); i++)
+		{
+			for (size_t j = 0; j < boards[i].size(); j++)
+			{
+				if (IntersectRect(&temprect, &turnWhiterect, &boards[i][j].rect))
+				{
+					boards[i][j].color = RGB(255, 255, 255);
+				}
+			}
+		}
 		break;
 	
 	case WM_PAINT:
@@ -129,7 +146,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		player.paint(mDC);
-		
+		bulletControl.paint(mDC);
 
 
 
@@ -147,7 +164,23 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 	case WM_KEYDOWN:
-		
+		switch (wParam)
+		{
+		case VK_UP:
+			bulletControl.shoot(2,player);
+			break;
+		case VK_DOWN:
+			bulletControl.shoot(4, player);
+			break;
+		case VK_LEFT:
+			bulletControl.shoot(1, player);
+			break;
+		case VK_RIGHT:
+			bulletControl.shoot(3, player);
+			break;
+		default:
+			break;
+		}
 		break;
 	case WM_KEYUP:
 		switch (wParam)
@@ -203,11 +236,24 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	static double time = 0;
 	time += player.speed;
+	
 	if (time>=1)
 	{
+		player.beforeRect = player.rect;
 		player.move();
+		player.collision(boards,GameRect);
 		time = 0;
 	}
+	static double bulletTime = 0;
+	bulletTime += bulletControl.getSpeed();
+	if (bulletTime >= 1)
+	{
+		bulletControl.setPlayer(player);
+		bulletControl.move();
+		bulletControl.collision(boards, GameRect);
+		bulletTime = 0;
+	}
+	
 	
 	InvalidateRect(hWnd, NULL, false);
 }

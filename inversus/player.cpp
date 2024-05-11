@@ -1,5 +1,6 @@
 #include "Player.h"
-
+#include "Board.h"
+#include"Bullet.h"
 Player::Player()
 {
 	circles.resize(6);
@@ -8,6 +9,9 @@ Player::Player()
 		circles[i].angle = 1.0471975 * i;
 	}
 	OffsetRect(&rect, gameRect.bottom/2, gameRect.right/2);
+	beforeRect = rect;
+	playerState = STOP;
+
 }
 
 void Player::move()
@@ -15,16 +19,16 @@ void Player::move()
 	switch (playerState)
 	{
 	case Player::L:
-		OffsetRect(&rect, -5, 0);
+		OffsetRect(&rect, -10, 0);
 		break;
 	case Player::R:
-		OffsetRect(&rect, 5, 0);
+		OffsetRect(&rect, 10, 0);
 		break;
 	case Player::T:
-		OffsetRect(&rect, 0, -5);
+		OffsetRect(&rect, 0, -10);
 		break;
 	case Player::B:
-		OffsetRect(&rect, 0, 5);
+		OffsetRect(&rect, 0, 10);
 		break;
 	default:
 		break;
@@ -40,7 +44,7 @@ void Player::paint(HDC hdc)
 	oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 	oldPen = (HPEN)SelectObject(hdc, hPen);
-	RoundRect(hdc, rect.left, rect.top, rect.right, rect.bottom,20,20);
+	RoundRect(hdc, rect.left+2.5, rect.top+2.5, rect.right-2.5, rect.bottom-2.5,20,20);
 	SelectObject(hdc, oldPen);
 	DeleteObject(hPen);
 	SelectObject(hdc, oldBrush);
@@ -62,8 +66,40 @@ void Player::rotateBullet()
 
 void Player::setRect(RECT rectsize)
 {
-	rect = rectsize;
+	rect.left = rectsize.left+2;
+	rect.top = rectsize.top+2;
+	rect.right = rectsize.right-2;
+	rect.bottom = rectsize.bottom-2;
 }
+
+
+
+void Player::collision(vector<vector<Board>> board,RECT gameRect)
+{
+	RECT temp;
+	
+	for (size_t i = 0; i < board.size(); i++)
+	{
+		for (size_t j = 0; j < board[i].size(); j++)
+		{
+			if (IntersectRect(&temp,&rect,&board[i][j].rect)&&board[i][j].color==RGB(0,0,0))
+			{
+				rect = beforeRect;
+				playerState = STOP;
+			}
+			if (gameRect.right<rect.right||gameRect.bottom<rect.bottom||gameRect.top>rect.top||gameRect.left>rect.left)
+			{
+				rect = beforeRect;
+				playerState = STOP;
+			}
+			
+		}
+	}
+}
+
+
+
+
 
 
 

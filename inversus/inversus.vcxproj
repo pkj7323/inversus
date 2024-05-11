@@ -128,12 +128,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="BulletControl.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="BulletControl.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Player.h" />
