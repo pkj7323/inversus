@@ -107,7 +107,8 @@ void BulletControl::collision(vector<vector<Board>>& board, RECT gameRect)
 		}
 		if (BoardFor(board,bullets[i]))
 		{
-			break;
+			
+			
 		}
 	}
 }

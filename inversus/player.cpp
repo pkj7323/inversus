@@ -44,7 +44,7 @@ void Player::paint(HDC hdc)
 	oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 	oldPen = (HPEN)SelectObject(hdc, hPen);
-	RoundRect(hdc, rect.left+2.5, rect.top+2.5, rect.right-2.5, rect.bottom-2.5,20,20);
+	RoundRect(hdc, rect.left, rect.top, rect.right, rect.bottom,20,20);
 	SelectObject(hdc, oldPen);
 	DeleteObject(hPen);
 	SelectObject(hdc, oldBrush);
