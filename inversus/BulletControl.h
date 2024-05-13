@@ -14,6 +14,7 @@ public:
 	void collision(vector<vector<Board>>& board, RECT gameRect);
 	void setPlayer(Player player);
 	double getSpeed();
+	vector<Bullet> getBullets();
 private:
 	double speed = 0.7f;
 	vector<Bullet> bullets;

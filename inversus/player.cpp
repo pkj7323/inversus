@@ -3,6 +3,9 @@
 #include"Bullet.h"
 Player::Player()
 {
+}
+Player::Player(RECT gameRect)
+{
 	circles.resize(6);
 	for (size_t i = 0; i < circles.size(); i++)
 	{
@@ -15,6 +18,11 @@ Player::Player()
 	R = false;
 	T = false;
 	B = false;
+
+}
+
+Player::~Player()
+{
 
 }
 
@@ -43,7 +51,7 @@ void Player::paint(HDC hdc)
 {
 	HBRUSH hBrush, oldBrush;
 	HPEN hPen, oldPen;
-	hBrush = CreateSolidBrush(rectColor);
+	hBrush = CreateSolidBrush(*rectColor);
 	oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 	oldPen = (HPEN)SelectObject(hdc, hPen);
@@ -54,7 +62,7 @@ void Player::paint(HDC hdc)
 	DeleteObject(hBrush);
 	for (size_t i = 0; i < circles.size(); i++)
 	{
-		circles[i].paint(hdc, rectColor);
+		circles[i].paint(hdc, *rectColor);
 	}
 }
 
@@ -73,6 +81,10 @@ void Player::setRect(RECT rectsize)
 	rect.top = rectsize.top+2;
 	rect.right = rectsize.right-2;
 	rect.bottom = rectsize.bottom-2;
+
+	AroundRect = RECT{ rect.left - (rectsize.right - rectsize.left) ,rect.top - (rectsize.bottom - rectsize.top),
+			rect.right + (rectsize.right - rectsize.left),rect.bottom + (rectsize.bottom - rectsize.top) };
+
 }
 
 
@@ -85,26 +97,83 @@ void Player::collision(vector<vector<Board>> board,RECT gameRect)
 	{
 		for (size_t j = 0; j < board[i].size(); j++)
 		{
-			if (IntersectRect(&temp,&rect,&board[i][j].rect)&&board[i][j].color==RGB(0,0,0))
+			if (IntersectRect(&temp,&rect,&board[i][j].rect)&&board[i][j].color!=RGB(255,255,255))
 			{
 				rect = beforeRect;
-				L = false;
-				R = false;
-				T = false;
-				B = false;
+				
 			}
 			if (gameRect.right<rect.right||gameRect.bottom<rect.bottom||gameRect.top>rect.top||gameRect.left>rect.left)
 			{
 				rect = beforeRect;
-				L = false;
-				R = false;
-				T = false;
-				B = false;
+				
 			}
 			
 		}
 	}
 }
+
+void Player::shoot()
+{
+	for (size_t i = 0; i < circles.size(); i++)
+	{
+		if (circles[i].wasShot == false)
+		{
+			circles[i].wasShot = true;
+			break;
+		}
+		
+	}
+	if (bulletCount>0)
+	{
+		bulletCount--;
+	}
+	
+}
+
+int Player::getBulletCount()
+{
+	return bulletCount;
+}
+
+void Player::shootCooltime()
+{
+	if (coolTime<=0)
+	{
+		addBulletCount();
+		coolTime = 10;
+	}
+	coolTime -= 1;
+}
+
+void Player::addBulletCount()
+{
+	if (bulletCount < 6)
+	{
+		bulletCount++;
+		for (size_t i = 0; i < circles.size(); i++)
+		{
+			if (circles[i].wasShot == true)
+			{
+				circles[i].wasShot = false;
+				break;
+			}
+
+		}
+	}
+}
+
+void Player::Death()
+{
+	//죽음 타이머 돌아가고 맵 가운데 생성 이펙트
+	//맵 가운데 생성하면서 그주변 하얀색 및 적 사망
+	//죽음 타이머가 0이 되면 다시 생성
+}
+
+RECT Player::getAroundRect()
+{
+	return AroundRect;
+}
+
 
 
 

@@ -9,7 +9,7 @@ public:
 	COLORREF bulletTailColor = RGB(30, 30, 30);
 	RECT bulletTailRect2;
 	COLORREF bulletTailColor2 = RGB(80, 80, 80);
-	int dx, dy;
+	float dx, dy;
 	enum Direction
 	{
 		stop,L,T,R,B
@@ -17,7 +17,7 @@ public:
 	Direction direction = stop;
 	Bullet();
 	Bullet(Direction d);
-	float bulletMoveSpeed = 5;
+	float bulletMoveSpeed = 4.5f;
 	
 	void move();
 	void paint(HDC hdc);

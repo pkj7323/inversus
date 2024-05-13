@@ -21,75 +21,67 @@ void BulletControl::paint(HDC hdc)
 	
 }
 
-bool BulletControl::BoardFor(vector<vector<Board>>& board, Bullet bulletI)
-{
-	POINT pt = { bulletI.bulletRect.left+(bulletI.bulletRect.right - bulletI.bulletRect.left)/2,
-		bulletI.bulletRect.top+(bulletI.bulletRect.right-bulletI.bulletRect.left)/2};
-	for (size_t i = 0; i < board.size(); i++)
-	{
-		for (size_t j = 0; j < board[i].size(); j++)
-		{
-			if (PtInRect(&board[i][j].rect,pt)&&board[i][j].color==RGB(0,0,0))
-			{
-				board[i][j].color = RGB(255, 255, 255);
-				return true;
-			}
-		}
-	}
-	return false;
-}
+
 
 void BulletControl::shoot(int d,Player player)
 {
 	setPlayer(player);
-	Bullet::Direction dir;
-	switch (d)
+	if (player.getBulletCount()>0)
 	{
-	case 1:
-		dir = Bullet::L;
-		break;
-	case 2:
-		dir = Bullet::T;
-		break;
-	case 3:
-		dir = Bullet::R;
-		break;
-	case 4:
-		dir = Bullet::B;
-		break;
-	case 0:
-		dir = Bullet::stop;
-		break;
-	default:
-		break;
+		Bullet::Direction dir;
+		switch (d)
+		{
+		case 1:
+			dir = Bullet::L;
+			break;
+		case 2:
+			dir = Bullet::T;
+			break;
+		case 3:
+			dir = Bullet::R;
+			break;
+		case 4:
+			dir = Bullet::B;
+			break;
+		case 0:
+			dir = Bullet::stop;
+			break;
+		default:
+			dir = Bullet::stop;
+			break;
+		}
+		bullets.push_back(Bullet(dir));
+		Bullet* bullet = &bullets[bullets.size() - 1];
+		switch (dir)
+		{
+		case Bullet::L:
+			OffsetRect(&bullet->bulletRect, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			OffsetRect(&bullet->bulletTailRect, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			OffsetRect(&bullet->bulletTailRect2, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			break;
+		case Bullet::T:
+			OffsetRect(&bullet->bulletRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
+			OffsetRect(&bullet->bulletTailRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
+			OffsetRect(&bullet->bulletTailRect2, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
+			break;
+		case Bullet::R:
+			OffsetRect(&bullet->bulletRect, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			OffsetRect(&bullet->bulletTailRect, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			OffsetRect(&bullet->bulletTailRect2, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			break;
+		case Bullet::B:
+			OffsetRect(&bullet->bulletRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
+			OffsetRect(&bullet->bulletTailRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
+			OffsetRect(&bullet->bulletTailRect2, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
+			break;
+		default:
+			break;
+		}
 	}
-	bullets.push_back(Bullet(dir));
-	Bullet* bullet=&bullets[bullets.size() - 1];
-	switch (dir)
-	{
-	case Bullet::L:
-		OffsetRect(&bullet->bulletRect, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-		OffsetRect(&bullet->bulletTailRect, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-		OffsetRect(&bullet->bulletTailRect2, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-		break;
-	case Bullet::T:
-		OffsetRect(&bullet->bulletRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
-		OffsetRect(&bullet->bulletTailRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
-		OffsetRect(&bullet->bulletTailRect2, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
-		break;
-	case Bullet::R:
-		OffsetRect(&bullet->bulletRect, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-		OffsetRect(&bullet->bulletTailRect, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-		OffsetRect(&bullet->bulletTailRect2, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-		break;
-	case Bullet::B:
-		OffsetRect(&bullet->bulletRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
-		OffsetRect(&bullet->bulletTailRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
-		OffsetRect(&bullet->bulletTailRect2, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
-		break;
-	default:
-		break;
+	else {
+		return;
 	}
+	
 	
 }
 
@@ -112,7 +104,24 @@ void BulletControl::collision(vector<vector<Board>>& board, RECT gameRect)
 		}
 	}
 }
-
+bool BulletControl::BoardFor(vector<vector<Board>>& board, Bullet bulletI)
+{
+	RECT rect;
+	for (size_t i = 0; i < board.size(); i++)
+	{
+		for (size_t j = 0; j < board[i].size(); j++)
+		{
+			if (IntersectRect(&rect,&board[i][j].rect, &bulletI.bulletRect) && board[i][j].color == RGB(0, 0, 0)
+				|| IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletTailRect) && board[i][j].color == RGB(0, 0, 0)
+				|| IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletTailRect2) && board[i][j].color == RGB(0, 0, 0))
+			{
+				board[i][j].color = RGB(255, 255, 255);
+				return true;
+			}
+		}
+	}
+	return false;
+}
 void BulletControl::setPlayer(Player player)
 {
 	this->player = player;
@@ -121,6 +130,11 @@ void BulletControl::setPlayer(Player player)
 double BulletControl::getSpeed()
 {
 	return speed;
+}
+
+vector<Bullet> BulletControl::getBullets()
+{
+	return bullets;
 }
 
 

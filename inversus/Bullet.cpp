@@ -22,24 +22,24 @@ Bullet::Bullet(Direction d)
 		bulletTailRect2 = RECT{ 0,0,0,0 };
 		break;
 	case Bullet::L:
-		bulletRect = RECT{ 0,0,20,10 };
-		bulletTailRect = RECT{ 10,0,30,10 };
-		bulletTailRect2 = RECT{ 20,0,50,10 };
+		bulletRect = RECT{ 0,0,20,20 };
+		bulletTailRect = RECT{ 10,0,30,20 };
+		bulletTailRect2 = RECT{ 20,0,50,20 };
 		break;
 	case Bullet::T:
-		bulletRect = RECT{ 0,0,10,20 };
-		bulletTailRect = RECT{ 0,10,10,30 };
-		bulletTailRect2 = RECT{ 0,20,10,50 };
+		bulletRect = RECT{ 0,0,20,20 };
+		bulletTailRect = RECT{ 0,10,20,30 };
+		bulletTailRect2 = RECT{ 0,20,20,50 };
 		break;
 	case Bullet::R:
-		bulletTailRect2 = RECT{ 0,0,30,10 };
-		bulletTailRect = RECT{ 20,0,40,10 };
-		bulletRect = RECT{ 30,0,50,10 };
+		bulletTailRect2 = RECT{ 0,0,30,20 };
+		bulletTailRect = RECT{ 20,0,40,20 };
+		bulletRect = RECT{ 30,0,50,20 };
 		break;
 	case Bullet::B:
-		bulletTailRect2 = RECT{ 0,0,10,30 };
-		bulletTailRect = RECT{ 0,20,10,40 };
-		bulletRect = RECT{ 0,30,10,50 };
+		bulletTailRect2 = RECT{ 0,0,20,30 };
+		bulletTailRect = RECT{ 0,20,20,40 };
+		bulletRect = RECT{ 0,30,20,50 };
 		break;
 	default:
 		bulletRect = RECT{ 0,0,0,0 };
@@ -54,21 +54,21 @@ void Bullet::move()
 	switch (direction)
 	{
 	case Bullet::L:
-		dx -= bulletMoveSpeed;
+		dx = -bulletMoveSpeed;
 		break;
 	case Bullet::T:
-		dy -= bulletMoveSpeed;
+		dy = -bulletMoveSpeed;
 		break;
 	case Bullet::R:
-		dx += bulletMoveSpeed;
+		dx = bulletMoveSpeed;
 		break;
 	case Bullet::B:
-		dy += bulletMoveSpeed;
+		dy = bulletMoveSpeed;
 		break;
 	default:
 		break;
 	}
-	
+	bulletMoveSpeed += 1.5f;
 	OffsetRect(&bulletRect, dx, dy);
 	OffsetRect(&bulletTailRect, dx, dy);
 	OffsetRect(&bulletTailRect2, dx, dy);

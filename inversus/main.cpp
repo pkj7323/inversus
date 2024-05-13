@@ -3,20 +3,25 @@
 #include<vector>
 #include"Board.h"
 #include<chrono>
-
+#include"Enemy.h"
 #include "Player.h"
 #include"BulletControl.h"
+#include<random>
 #pragma comment (lib, "msimg32.lib")
 using namespace std;
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"Inversus";
+
+mt19937 mt{ random_device{}() };
+
 typedef Player PLAYER;
 LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 void CALLBACK ScoreFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 void setRects(RECT gamerect, vector<vector<Board>>& rects, int xDiv,int yDiv, RECT& playerSize);
 void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
-
+void CALLBACK bulletTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
+void CALLBACK coolTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
 	HWND hWnd;
 	MSG message;
@@ -50,10 +55,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 }
 
 int Score = 0;
+int num = 11;
 PLAYER player;
 vector<vector<Board>> boards;
 RECT GameRect;
 BulletControl bulletControl;
+static Enemy* enemies= new Enemy[10];
 LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC hDC, mDC;
@@ -62,8 +69,8 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	
 	static RECT playerRect;
 	
-	static int xDiv = 11;
-	static int yDiv = 11;
+	static int xDiv = num;
+	static int yDiv = num;
 	static RECT turnWhiterect;
 	static RECT temprect;
 	HPEN hPen, oldPen;
@@ -79,17 +86,20 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			boards[i].resize(xDiv);
 		}
 		SetTimer(hWnd, 1, 30, (TIMERPROC)ScoreFunc);
-		
-		SetTimer(hWnd, 3, 0.000001, (TIMERPROC)moveFunc);
+		SetTimer(hWnd, 2, 250, (TIMERPROC)coolTimer);
+		SetTimer(hWnd, 3, 1, (TIMERPROC)bulletTimer);
+		SetTimer(hWnd, 4, 1, (TIMERPROC)moveFunc);
 		GetClientRect(hWnd, &clientrect);
 		GameRect = RECT{ 0,0,700,700 };
 		turnWhiterect = RECT{ 0,0,140,140 };
 		
 		OffsetRect(&GameRect, (clientrect.right - 700) / 2, 120);
 		setRects(GameRect, boards, xDiv, yDiv, playerRect);
-		
+		player = PLAYER(GameRect);
 		player.setRect(playerRect);
-		OffsetRect(&turnWhiterect, player.rect.left - (playerRect.right - playerRect.left), player.rect.top - 25);
+		enemies[0].setRect(boards[0][0].rect, boards[0][0]);
+		
+		turnWhiterect = player.getAroundRect();
 		for (size_t i = 0; i < boards.size(); i++)
 		{
 			for (size_t j = 0; j < boards[i].size(); j++)
@@ -107,11 +117,6 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hDC = BeginPaint(hWnd, &ps);
 		GetClientRect(hWnd, &clientrect);
 		
-		
-		
-
-		
-
 		mDC = CreateCompatibleDC(hDC);//메모리 dc만들기
 		hBitmap = CreateCompatibleBitmap(hDC, clientrect.right, clientrect.bottom);//메모리Dc와 연결할 비트맵 만들기
 		SelectObject(mDC, (HBITMAP)hBitmap);//메모리DC와 비트맵 연결
@@ -146,7 +151,11 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		player.paint(mDC);
 		bulletControl.paint(mDC);
-
+		for (size_t i = 0; i < 10; i++)
+		{
+			enemies[i].paint(mDC);
+		}
+		
 
 
 		//복사하고 
@@ -166,20 +175,27 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_UP:
+
 			bulletControl.shoot(2,player);
+			player.shoot();
 			break;
 		case VK_DOWN:
 			bulletControl.shoot(4, player);
+			player.shoot();
 			break;
 		case VK_LEFT:
 			bulletControl.shoot(1, player);
+			player.shoot();
 			break;
 		case VK_RIGHT:
 			bulletControl.shoot(3, player);
+			player.shoot();
 			break;
 		default:
 			break;
 		}
+		
+		InvalidateRect(hWnd, NULL, false);
 		break;
 	case WM_KEYUP:
 		switch (wParam)
@@ -227,32 +243,74 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
+void CALLBACK coolTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+	
+	player.shootCooltime();
+	
+	InvalidateRect(hWnd, NULL, false);
+}
 void CALLBACK ScoreFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	Score++;
 	InvalidateRect(hWnd, NULL, false);
 }
-void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+void CALLBACK bulletTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
-	static double time = 0;
-	time += player.speed;
-	
-	if (time>=1)
-	{
-		player.beforeRect = player.rect;
-		player.move();
-		player.collision(boards,GameRect);
-		time = 0;
-	}
 	static double bulletTime = 0;
 	bulletTime += bulletControl.getSpeed();
 	if (bulletTime >= 1)
 	{
 		bulletControl.setPlayer(player);
+		
 		bulletControl.move();
 		bulletControl.collision(boards, GameRect);
 		bulletTime = 0;
 	}
+	InvalidateRect(hWnd, NULL, false);
+	
+}
+void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+	static double time = 0;
+	time += player.speed;
+	uniform_int_distribution<int> dist{ 0,num };
+	static double enemyTime = 0;
+	enemyTime += 0.005;
+	if (enemyTime > 1)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			if (!enemies[i].getIsAlive())
+			{
+				enemies[i].setRect(boards[dist(mt)][dist(mt)].rect, boards[dist(mt)][dist(mt)]);
+				break;
+			}
+		}
+		
+		
+		
+		enemyTime = 0;
+	}
+	if (time>=1)
+	{
+		player.beforeRect = player.rect;
+		player.move();
+		player.collision(boards, GameRect);
+		
+		
+		for (size_t i = 0; i < 10; i++)
+		{
+			enemies[i].move(player);
+			enemies[i].collision(player, bulletControl, boards);
+			
+		}
+		
+		
+		
+		time = 0;
+	}
+	
 	
 	player.rotateBullet();
 	InvalidateRect(hWnd, NULL, false);
