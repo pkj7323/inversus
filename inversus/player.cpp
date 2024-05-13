@@ -10,28 +10,31 @@ Player::Player()
 	}
 	OffsetRect(&rect, gameRect.bottom/2, gameRect.right/2);
 	beforeRect = rect;
-	playerState = STOP;
+	
+	L = false;
+	R = false;
+	T = false;
+	B = false;
 
 }
 
 void Player::move()
 {
-	switch (playerState)
+	if (L)
 	{
-	case Player::L:
 		OffsetRect(&rect, -10, 0);
-		break;
-	case Player::R:
+	}
+	if (R)
+	{
 		OffsetRect(&rect, 10, 0);
-		break;
-	case Player::T:
+	}
+	if (T)
+	{
 		OffsetRect(&rect, 0, -10);
-		break;
-	case Player::B:
+	}
+	if (B)
+	{
 		OffsetRect(&rect, 0, 10);
-		break;
-	default:
-		break;
 	}
 	
 }
@@ -85,12 +88,18 @@ void Player::collision(vector<vector<Board>> board,RECT gameRect)
 			if (IntersectRect(&temp,&rect,&board[i][j].rect)&&board[i][j].color==RGB(0,0,0))
 			{
 				rect = beforeRect;
-				playerState = STOP;
+				L = false;
+				R = false;
+				T = false;
+				B = false;
 			}
 			if (gameRect.right<rect.right||gameRect.bottom<rect.bottom||gameRect.top>rect.top||gameRect.left>rect.left)
 			{
 				rect = beforeRect;
-				playerState = STOP;
+				L = false;
+				R = false;
+				T = false;
+				B = false;
 			}
 			
 		}

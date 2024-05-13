@@ -8,10 +8,7 @@ class Player
 {
 public:
 	Player();
-	enum state
-	{
-		STOP,L, R, T, B,
-	};
+	
 	void move();
 	void paint(HDC hdc);
 	void rotateBullet();
@@ -26,9 +23,9 @@ public:
 	RECT gameRect;
 	COLORREF rectColor = RGB(100, 100, 100);
 	vector<Circle> circles;
-	state playerState;
-	double speed = 0.7f;
 	
+	double speed = 0.7f;
+	bool L, R, T, B;
 	
 };
 

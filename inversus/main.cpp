@@ -3,7 +3,7 @@
 #include<vector>
 #include"Board.h"
 #include<chrono>
-#include<atlimage.h>
+
 #include "Player.h"
 #include"BulletControl.h"
 #pragma comment (lib, "msimg32.lib")
@@ -16,7 +16,6 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 void CALLBACK ScoreFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 void setRects(RECT gamerect, vector<vector<Board>>& rects, int xDiv,int yDiv, RECT& playerSize);
 void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
-void CALLBACK rotateFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
 	HWND hWnd;
@@ -80,7 +79,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			boards[i].resize(xDiv);
 		}
 		SetTimer(hWnd, 1, 30, (TIMERPROC)ScoreFunc);
-		SetTimer(hWnd, 2, 10, (TIMERPROC)rotateFunc);
+		
 		SetTimer(hWnd, 3, 0.000001, (TIMERPROC)moveFunc);
 		GetClientRect(hWnd, &clientrect);
 		GameRect = RECT{ 0,0,700,700 };
@@ -186,16 +185,16 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 'W':
-			player.playerState = PLAYER::STOP;
+			player.T = false;
 			break;
 		case 'S':
-			player.playerState = PLAYER::STOP;
+			player.B= false;
 			break;
 		case 'A':
-			player.playerState = PLAYER::STOP;
+			player.L = false;		
 			break;
 		case 'D':
-			player.playerState = PLAYER::STOP;
+			player.R = false;
 			break;
 		default:
 			break;
@@ -205,16 +204,17 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 'w':
-			player.playerState = PLAYER::T;
+			player.T = true;
 			break;
 		case 's':
-			player.playerState = PLAYER::B;
+			player.B = true;
 			break;
 		case 'a':
-			player.playerState = PLAYER::L;
+			player.L = true;
 			break;
 		case 'd':
-			player.playerState = PLAYER::R;
+			player.R = true;
+			
 			break;
 		default:
 			break;
@@ -254,13 +254,10 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		bulletTime = 0;
 	}
 	
-	
+	player.rotateBullet();
 	InvalidateRect(hWnd, NULL, false);
 }
-void CALLBACK rotateFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
-{
-	player.rotateBullet();
-}
+
 void setRects(RECT gamerect, vector<vector<Board>>& boards, int xDiv,int yDiv,RECT& playerSize)
 {
 	RECT temp = gamerect;
