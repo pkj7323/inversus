@@ -12,11 +12,12 @@ public:
 	void paint(HDC hdc);
 	void setRect(RECT rect,Board board);
 	void move(Player player);
-	bool collision(Player player, BulletControl& bulletControl, vector<vector<Board>>& boards);
+	bool collision(Player& player, BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect);
 	bool getIsAlive();
 	void setIsAlive(bool trigger);
 	RECT getRect();
 	void Death(vector<vector<Board>>& boards);
+	RECT getAroundRect();
 	Effect effect;
 private:
 	float spawnTime = 10;

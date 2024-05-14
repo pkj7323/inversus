@@ -88,7 +88,7 @@ void Enemy::move(Player player)
 	
 }
 
-bool Enemy::collision(Player player, BulletControl& bulletControl, vector<vector<Board>>& boards)
+bool Enemy::collision(Player& player, BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect)
 {
 	RECT temp;
 	POINT thisPos = { rect.left + (rect.right - rect.left) / 2,
@@ -105,13 +105,17 @@ bool Enemy::collision(Player player, BulletControl& bulletControl, vector<vector
 			{
 				if (PtInRect(&boards[i][j].rect, thisPos))
 				{
-					boards[i][j].color = RGB(0, 0, 0);
+					if (boards[i][j].color == RGB(255, 255, 255))
+					{
+						boards[i][j].color = RGB(0, 0, 0);
+					}
+					
 				}
 			}
 		}
 		if (IntersectRect(&temp, &rect, &player.rect))
 		{
-			//플레이어 죽음
+			player.Death(gamerect);
 		}
 		vector<Bullet> bullets = bulletControl.getBullets();
 		for (size_t i = 0; i < bullets.size(); i++)
@@ -158,11 +162,20 @@ void Enemy::Death(vector<vector<Board>>& boards)
 		{
 			if (IntersectRect(&temp,&AroundRect,&boards[i][j].rect))
 			{
-				boards[i][j].color = RGB(255, 255, 255);
+				if (boards[i][j].color == RGB(0, 0, 0))
+				{
+					boards[i][j].color = RGB(255, 255, 255);
+				}
+				
 			}
 			
 		}
 	}
 
+}
+
+RECT Enemy::getAroundRect()
+{
+	return AroundRect;
 }
 

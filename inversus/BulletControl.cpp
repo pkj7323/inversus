@@ -59,24 +59,43 @@ void BulletControl::shoot(int d,Player player)
 		switch (dir)
 		{
 		case Bullet::L:
-			OffsetRect(&bullet->bulletRect, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-			OffsetRect(&bullet->bulletTailRect, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-			OffsetRect(&bullet->bulletTailRect2, player.rect.left, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			OffsetRect(&bullet->bulletRect, player.rect.left,
+				(player.rect.top + (player.rect.bottom - player.rect.top) / 2) - ((bullet->bulletRect.bottom - bullet->bulletRect.top) / 2));
+			OffsetRect(&bullet->bulletTailRect, player.rect.left, 
+				(player.rect.top + (player.rect.bottom - player.rect.top) / 2) - ((bullet->bulletRect.bottom - bullet->bulletRect.top) / 2));
+			OffsetRect(&bullet->bulletTailRect2, player.rect.left,
+				(player.rect.top + (player.rect.bottom - player.rect.top) / 2) - ((bullet->bulletRect.bottom - bullet->bulletRect.top) / 2));
 			break;
 		case Bullet::T:
-			OffsetRect(&bullet->bulletRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
-			OffsetRect(&bullet->bulletTailRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
-			OffsetRect(&bullet->bulletTailRect2, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.top);
+			OffsetRect(&bullet->bulletRect
+				, (player.rect.left + (player.rect.right - player.rect.left) / 2)-((bullet->bulletRect.right - bullet->bulletRect.left) / 2)
+				, player.rect.top);
+			OffsetRect(&bullet->bulletTailRect
+				, (player.rect.left + (player.rect.right - player.rect.left) / 2) - ((bullet->bulletRect.right - bullet->bulletRect.left) / 2)
+				, player.rect.top);
+			OffsetRect(&bullet->bulletTailRect2
+				, (player.rect.left + (player.rect.right - player.rect.left) / 2) - ((bullet->bulletRect.right - bullet->bulletRect.left) / 2)
+				, player.rect.top);
 			break;
 		case Bullet::R:
-			OffsetRect(&bullet->bulletRect, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-			OffsetRect(&bullet->bulletTailRect, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
-			OffsetRect(&bullet->bulletTailRect2, player.rect.right, player.rect.top + (player.rect.bottom - player.rect.top) / 2);
+			OffsetRect(&bullet->bulletRect, player.rect.right, 
+				(player.rect.top + (player.rect.bottom - player.rect.top) / 2) - ((bullet->bulletRect.bottom - bullet->bulletRect.top) / 2));
+			
+			OffsetRect(&bullet->bulletTailRect, player.rect.right,
+				(player.rect.top + (player.rect.bottom - player.rect.top) / 2) - ((bullet->bulletRect.bottom - bullet->bulletRect.top) / 2));
+			OffsetRect(&bullet->bulletTailRect2, player.rect.right, 
+				(player.rect.top + (player.rect.bottom - player.rect.top) / 2) - ((bullet->bulletRect.bottom - bullet->bulletRect.top) / 2));
 			break;
 		case Bullet::B:
-			OffsetRect(&bullet->bulletRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
-			OffsetRect(&bullet->bulletTailRect, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
-			OffsetRect(&bullet->bulletTailRect2, player.rect.left + (player.rect.right - player.rect.left) / 2, player.rect.bottom);
+			OffsetRect(&bullet->bulletRect, 
+				(player.rect.left + (player.rect.right - player.rect.left) / 2) - ((bullet->bulletRect.right - bullet->bulletRect.left) / 2)
+				, player.rect.bottom);
+			OffsetRect(&bullet->bulletTailRect, 
+				(player.rect.left + (player.rect.right - player.rect.left) / 2) - ((bullet->bulletRect.right - bullet->bulletRect.left) / 2)
+				, player.rect.bottom);
+			OffsetRect(&bullet->bulletTailRect2,
+				(player.rect.left + (player.rect.right - player.rect.left) / 2) - ((bullet->bulletRect.right - bullet->bulletRect.left) / 2)
+				, player.rect.bottom);
 			break;
 		default:
 			break;
@@ -136,9 +155,6 @@ void BulletControl::setBullets(vector<Bullet> bullets)
 	this->bullets = bullets;
 
 }
-
-
-
 vector<Bullet> BulletControl::getBullets()
 {
 	return bullets;
