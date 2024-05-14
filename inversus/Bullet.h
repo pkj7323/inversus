@@ -18,8 +18,11 @@ public:
 	Bullet();
 	Bullet(Direction d);
 	float bulletMoveSpeed = 4.5f;
-	
+	bool addBulletTime();
 	void move();
 	void paint(HDC hdc);
+private:
+	float bulletTimer = 0;
+	float bulletTimerAccel = 0.1f;
 };
 

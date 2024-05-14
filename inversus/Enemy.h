@@ -1,6 +1,7 @@
 #pragma once
 #include "header.h"
 #include "Board.h"
+#include"Effect.h"
 class Player;
 class BulletControl;
 class Enemy
@@ -14,9 +15,11 @@ public:
 	bool collision(Player player, BulletControl& bulletControl, vector<vector<Board>>& boards);
 	bool getIsAlive();
 	void setIsAlive(bool trigger);
-	bool Death(vector<vector<Board>>& boards);
-
+	RECT getRect();
+	void Death(vector<vector<Board>>& boards);
+	Effect effect;
 private:
+	float spawnTime = 10;
 	RECT rect;
 	RECT AroundRect;
 	bool isAlive;

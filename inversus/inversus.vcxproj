@@ -131,6 +131,7 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="BulletControl.cpp" />
     <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="DropBullets.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="main.cpp" />
@@ -141,10 +142,15 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="BulletControl.h" />
     <ClInclude Include="Circle.h" />
+    <ClInclude Include="DropBullets.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="inversus.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

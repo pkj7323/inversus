@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Board.h"
 #include"Bullet.h"
+#include"DropBullets.h"
 Player::Player()
 {
 }
@@ -31,18 +32,22 @@ void Player::move()
 	if (L)
 	{
 		OffsetRect(&rect, -10, 0);
+		OffsetRect(&AroundRect, -10, 0);
 	}
 	if (R)
 	{
 		OffsetRect(&rect, 10, 0);
+		OffsetRect(&AroundRect, 10, 0);
 	}
 	if (T)
 	{
 		OffsetRect(&rect, 0, -10);
+		OffsetRect(&AroundRect, 0, -10);
 	}
 	if (B)
 	{
 		OffsetRect(&rect, 0, 10);
+		OffsetRect(&AroundRect, 0, 10);
 	}
 	
 }
@@ -70,7 +75,7 @@ void Player::rotateBullet()
 {
 	for (size_t i = 0; i < circles.size(); i++)
 	{
-		circles[i].angle += 0.05;
+		
 		circles[i].rotateBullet(this->rect);
 	}
 }
@@ -89,10 +94,9 @@ void Player::setRect(RECT rectsize)
 
 
 
-void Player::collision(vector<vector<Board>> board,RECT gameRect)
+void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBullets>& dropbullets)
 {
 	RECT temp;
-	
 	for (size_t i = 0; i < board.size(); i++)
 	{
 		for (size_t j = 0; j < board[i].size(); j++)
@@ -100,14 +104,24 @@ void Player::collision(vector<vector<Board>> board,RECT gameRect)
 			if (IntersectRect(&temp,&rect,&board[i][j].rect)&&board[i][j].color!=RGB(255,255,255))
 			{
 				rect = beforeRect;
-				
 			}
 			if (gameRect.right<rect.right||gameRect.bottom<rect.bottom||gameRect.top>rect.top||gameRect.left>rect.left)
 			{
 				rect = beforeRect;
-				
 			}
 			
+		}
+	}
+	for (size_t i = 0; i < dropbullets.size(); i++)
+	{
+		RECT DBRects = dropbullets[i].getRect();
+		if (IntersectRect(&temp, &DBRects,&rect))
+		{
+			for (size_t j = 0; j < dropbullets[i].getNum(); j++)
+			{
+				addBulletCount();
+			}
+			dropbullets.erase(dropbullets.begin() + i);
 		}
 	}
 }
@@ -167,6 +181,11 @@ void Player::Death()
 	//죽음 타이머 돌아가고 맵 가운데 생성 이펙트
 	//맵 가운데 생성하면서 그주변 하얀색 및 적 사망
 	//죽음 타이머가 0이 되면 다시 생성
+}
+
+void Player::setAroundRect(RECT AroundRect)
+{
+	this->AroundRect = AroundRect;
 }
 
 RECT Player::getAroundRect()

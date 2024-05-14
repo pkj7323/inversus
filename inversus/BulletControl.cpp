@@ -8,7 +8,11 @@ void BulletControl::move()
 {
 	for (size_t i = 0; i < bullets.size(); i++)
 	{
-		bullets[i].move();
+		if (bullets[i].addBulletTime())
+		{
+			bullets[i].move();
+		}
+		
 	}
 }
 
@@ -127,10 +131,13 @@ void BulletControl::setPlayer(Player player)
 	this->player = player;
 }
 
-double BulletControl::getSpeed()
+void BulletControl::setBullets(vector<Bullet> bullets)
 {
-	return speed;
+	this->bullets = bullets;
+
 }
+
+
 
 vector<Bullet> BulletControl::getBullets()
 {

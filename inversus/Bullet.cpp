@@ -49,6 +49,31 @@ Bullet::Bullet(Direction d)
 	}
 }
 
+bool Bullet::addBulletTime()
+{
+	bulletTimer += bulletTimerAccel;
+	if (bulletTimer >= 1)
+	{
+		
+		bulletTimer = 0;
+		
+		if (bulletTimerAccel>=1)
+		{
+			
+			bulletMoveSpeed += 0.5f;
+		}
+		else
+		{
+			bulletTimerAccel += 0.1f;
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void Bullet::move()
 {
 	switch (direction)
@@ -68,7 +93,7 @@ void Bullet::move()
 	default:
 		break;
 	}
-	bulletMoveSpeed += 1.5f;
+	
 	OffsetRect(&bulletRect, dx, dy);
 	OffsetRect(&bulletTailRect, dx, dy);
 	OffsetRect(&bulletTailRect2, dx, dy);

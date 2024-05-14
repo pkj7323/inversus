@@ -3,6 +3,8 @@
 class Circle
 {
 public:
+	Circle();
+	Circle(int num, int i, COLORREF color);
 	int dx, dy;
 	double angle;
 	COLORREF color = RGB(0, 0, 0);

@@ -1,7 +1,20 @@
 #include "Circle.h"
 
+
+
+Circle::Circle()
+{
+}
+
+Circle::Circle(int num,int i,COLORREF color)
+{
+	angle = (360 / num) * i;
+	this->color = color;
+}
+
 void Circle::rotateBullet(RECT rect)
 {
+	angle += 0.05;
 	dx = rect.right - (rect.right - rect.left)/2 + 15 * cos(angle);
 	dy = rect.bottom - (rect.bottom - rect.top)/2 + 15 * sin(angle);
 }

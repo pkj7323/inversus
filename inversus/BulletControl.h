@@ -13,10 +13,11 @@ public:
 	void shoot(int d, Player player);
 	void collision(vector<vector<Board>>& board, RECT gameRect);
 	void setPlayer(Player player);
-	double getSpeed();
+	void setBullets(vector<Bullet> bullets);
+	
 	vector<Bullet> getBullets();
 private:
-	double speed = 0.7f;
+	
 	vector<Bullet> bullets;
 	Player player;
 };
