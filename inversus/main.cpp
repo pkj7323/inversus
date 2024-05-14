@@ -60,7 +60,7 @@ PLAYER player;
 vector<vector<Board>> boards;
 RECT GameRect;
 BulletControl bulletControl;
-static Enemy* enemies= new Enemy[10];
+vector <Enemy> enemies;
 LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC hDC, mDC;
@@ -97,7 +97,8 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		setRects(GameRect, boards, xDiv, yDiv, playerRect);
 		player = PLAYER(GameRect);
 		player.setRect(playerRect);
-		enemies[0].setRect(boards[0][0].rect, boards[0][0]);
+		enemies.push_back(Enemy(boards[0][0].rect, boards[0][0]));
+		
 		
 		turnWhiterect = player.getAroundRect();
 		for (size_t i = 0; i < boards.size(); i++)
@@ -151,7 +152,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		player.paint(mDC);
 		bulletControl.paint(mDC);
-		for (size_t i = 0; i < 10; i++)
+		for (size_t i = 0; i < enemies.size(); i++)
 		{
 			enemies[i].paint(mDC);
 		}
@@ -274,19 +275,17 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 	static double time = 0;
 	time += player.speed;
-	uniform_int_distribution<int> dist{ 0,num };
+	uniform_int_distribution<int> dist{ 0,num-1 };
 	static double enemyTime = 0;
 	enemyTime += 0.005;
 	if (enemyTime > 1)
 	{
-		for (int i = 0; i < 10; i++)
+		if (enemies.size()<10)
 		{
-			if (!enemies[i].getIsAlive())
-			{
-				enemies[i].setRect(boards[dist(mt)][dist(mt)].rect, boards[dist(mt)][dist(mt)]);
-				break;
-			}
+			enemies.push_back(Enemy(boards[dist(mt)][dist(mt)].rect, boards[dist(mt)][dist(mt)]));
 		}
+			
+		
 		
 		
 		
@@ -299,10 +298,12 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		player.collision(boards, GameRect);
 		
 		
-		for (size_t i = 0; i < 10; i++)
+		for (size_t i = 0; i < enemies.size(); i++)
 		{
 			enemies[i].move(player);
-			enemies[i].collision(player, bulletControl, boards);
+			if (enemies[i].collision(player, bulletControl, boards)) {
+				enemies.erase(enemies.begin() + i);
+			}
 			
 		}
 		
