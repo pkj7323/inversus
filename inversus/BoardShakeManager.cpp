@@ -33,6 +33,10 @@ void BoardShakeManager::shake(RECT& gamerect, vector<vector<Board>>& boards)
 
 void BoardShakeManager::update()
 {
+	if (seq == stop)
+	{
+		seq = one;
+	}
 }
 
 BoardShakeManager::BoardShakeManager()

@@ -7,6 +7,7 @@ class Board;
 class Bullet;
 class DropBullets;
 class Enemy;
+class Lifeitem;
 class Player
 {
 public:
@@ -18,7 +19,7 @@ public:
 	void rotateBullet();
 	void setRect(RECT rect);
 	
-	void collision(vector<vector<Board>> board, RECT gameRect, vector<DropBullets>& dropbullets);
+	void collision(vector<vector<Board>> board, RECT gameRect, vector<DropBullets>& dropbullets,vector<Lifeitem>& lifeitems);
 	void shoot();
 	int getBulletCount();
 	void shootCooltime();

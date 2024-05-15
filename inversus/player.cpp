@@ -3,6 +3,7 @@
 #include"Bullet.h"
 #include"DropBullets.h"
 #include"enemy.h"
+#include"Lifeitem.h"
 Player::Player()
 {
 }
@@ -28,26 +29,30 @@ Player::Player(RECT gameRect)
 
 void Player::move()
 {
-	if (L)
+	if (isAlive)
 	{
-		OffsetRect(&rect, -10, 0);
-		OffsetRect(&AroundRect, -10, 0);
+		if (L)
+		{
+			OffsetRect(&rect, -10, 0);
+			OffsetRect(&AroundRect, -10, 0);
+		}
+		if (R)
+		{
+			OffsetRect(&rect, 10, 0);
+			OffsetRect(&AroundRect, 10, 0);
+		}
+		if (T)
+		{
+			OffsetRect(&rect, 0, -10);
+			OffsetRect(&AroundRect, 0, -10);
+		}
+		if (B)
+		{
+			OffsetRect(&rect, 0, 10);
+			OffsetRect(&AroundRect, 0, 10);
+		}
 	}
-	if (R)
-	{
-		OffsetRect(&rect, 10, 0);
-		OffsetRect(&AroundRect, 10, 0);
-	}
-	if (T)
-	{
-		OffsetRect(&rect, 0, -10);
-		OffsetRect(&AroundRect, 0, -10);
-	}
-	if (B)
-	{
-		OffsetRect(&rect, 0, 10);
-		OffsetRect(&AroundRect, 0, 10);
-	}
+	
 	
 }
 
@@ -100,7 +105,7 @@ void Player::setRect(RECT rectsize)
 
 
 
-void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBullets>& dropbullets)
+void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBullets>& dropbullets,vector<Lifeitem>& lifeitems)
 {
 	RECT temp;
 	if (isAlive)
@@ -132,6 +137,20 @@ void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBull
 				}
 				dropbullets.erase(dropbullets.begin() + i);
 				break;
+			}
+		}
+		for (size_t i = 0; i < lifeitems.size(); i++)
+		{
+			RECT temp;
+			RECT liferect = lifeitems[i].getRect();
+			if (IntersectRect(&temp,&rect,&liferect))
+			{
+				if (life<3)
+				{
+					life += lifeitems[i].getlife();
+				}
+				
+				lifeitems.erase(lifeitems.begin() + i);
 			}
 		}
 	}

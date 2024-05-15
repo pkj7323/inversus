@@ -12,7 +12,7 @@ public:
 	void paint(HDC hdc);
 	void setRect(RECT rect,Board board);
 	void move(Player player);
-	bool collision(Player& player, BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect);
+	bool collision(Player& player, BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect,bool invincibile);
 	bool getIsAlive();
 	void setIsAlive(bool trigger);
 	RECT getRect();

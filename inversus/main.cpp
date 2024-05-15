@@ -11,6 +11,7 @@
 #include"BoardShakeManager.h"
 #include<random>
 #include"resource.h"
+#include"Lifeitem.h"
 #pragma comment (lib, "msimg32.lib")
 using namespace std;
 HINSTANCE g_hInst;
@@ -69,9 +70,10 @@ RECT GameRect;
 BulletControl bulletControl;
 vector <Enemy> enemies;
 vector<DropBullets> dropBullets;
-
+vector<Lifeitem> lifeitems;
 BoardShakeManager boardShakeManager;
 bool comboMessage = false;
+bool invincible = false;
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
@@ -108,55 +110,74 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		if (isStart)
 		{
-			hBrush = (HBRUSH)GetStockObject(GRAY_BRUSH);
-			oldBrush = (HBRUSH)SelectObject(mDC, hBrush);
-			hPen = CreatePen(PS_NULL, 1, RGB(0, 0, 0));
-			oldPen = (HPEN)SelectObject(mDC, hPen);
-			Rectangle(mDC, 0, 0, clientrect.right, clientrect.bottom);//메모리DC에 그리기
-			SelectObject(mDC, oldPen);
-			DeleteObject(hPen);
-			SelectObject(mDC, oldBrush);
-
-			Rectangle(mDC, clientrect.left, clientrect.top, clientrect.right, GameRect.top - 10);
-
-			hFont = CreateFont(50, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-				CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("굴림체"));
-			oldFont = (HFONT)SelectObject(mDC, hFont);
-			SetBkMode(mDC, TRANSPARENT);
-			TextOutW(mDC, 0, 0, L"SCORE", lstrlen(L"SCORE"));
-			str = to_wstring(Score);
-			if (comboMessage)
-			{
-				str += L"콤보!!";
-				
-			}
-			TextOutW(mDC, 0, 50, str.c_str(), str.size());
-
-			TextOutW(mDC, (clientrect.right - clientrect.left) / 2-120, 10, L"LIFE:", lstrlen(L"LIFE:"));
-			lifestr = to_wstring(player.getLife());
-			TextOutW(mDC, (clientrect.right - clientrect.left)/2, clientrect.top+10, lifestr.c_str(), lifestr.size());
-			SelectObject(mDC, oldFont);
-			DeleteObject(hFont);
-			for (size_t i = 0; i < boards.size(); i++)
-			{
-				for (size_t j = 0; j < boards[i].size(); j++)
-				{
-					boards[i][j].paint(mDC);
-				}
-			}
-			player.paint(mDC);
-			bulletControl.paint(mDC);
-			for (size_t i = 0; i < enemies.size(); i++)
-			{
-				enemies[i].paint(mDC);
-			}
-			for (size_t i = 0; i < dropBullets.size(); i++)
-			{
-				dropBullets[i].paint(mDC);
-			}
 			if (player.getLife() == 0)
 			{
-				PostQuitMessage(0);
+				Rectangle(mDC, 0, clientrect.top+100, clientrect.right, clientrect.bottom-100);
+				hFont = CreateFont(100, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+					CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("굴림체"));
+				oldFont = (HFONT)SelectObject(mDC, hFont);
+				SetBkMode(mDC, TRANSPARENT);
+				DrawText(mDC, L"GAME OVER", lstrlen(L"GAME OVER"), &clientrect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+				SelectObject(mDC, oldFont);
+				DeleteObject(hFont);
+				KillTimer(hWnd, 1);
+				KillTimer(hWnd, 2);
+				KillTimer(hWnd, 3);
+				KillTimer(hWnd, 4);
+				KillTimer(hWnd, 5);
+				isStart = false;
+			}
+			else {
+				hBrush = (HBRUSH)GetStockObject(GRAY_BRUSH);
+				oldBrush = (HBRUSH)SelectObject(mDC, hBrush);
+				hPen = CreatePen(PS_NULL, 1, RGB(0, 0, 0));
+				oldPen = (HPEN)SelectObject(mDC, hPen);
+				Rectangle(mDC, 0, 0, clientrect.right, clientrect.bottom);//메모리DC에 그리기
+				SelectObject(mDC, oldPen);
+				DeleteObject(hPen);
+				SelectObject(mDC, oldBrush);
+
+				Rectangle(mDC, clientrect.left, clientrect.top, clientrect.right, GameRect.top - 10);
+
+				hFont = CreateFont(50, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+					CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("굴림체"));
+				oldFont = (HFONT)SelectObject(mDC, hFont);
+				SetBkMode(mDC, TRANSPARENT);
+				TextOutW(mDC, 0, 0, L"SCORE", lstrlen(L"SCORE"));
+				str = to_wstring(Score);
+				if (comboMessage)
+				{
+					str += L"콤보!!";
+
+				}
+				TextOutW(mDC, 0, 50, str.c_str(), str.size());
+
+				TextOutW(mDC, (clientrect.right - clientrect.left) / 2 - 120, 10, L"LIFE:", lstrlen(L"LIFE:"));
+				lifestr = to_wstring(player.getLife());
+				TextOutW(mDC, (clientrect.right - clientrect.left) / 2, clientrect.top + 10, lifestr.c_str(), lifestr.size());
+				SelectObject(mDC, oldFont);
+				DeleteObject(hFont);
+				for (size_t i = 0; i < boards.size(); i++)
+				{
+					for (size_t j = 0; j < boards[i].size(); j++)
+					{
+						boards[i][j].paint(mDC);
+					}
+				}
+				player.paint(mDC);
+				bulletControl.paint(mDC);
+				for (size_t i = 0; i < enemies.size(); i++)
+				{
+					enemies[i].paint(mDC);
+				}
+				for (size_t i = 0; i < dropBullets.size(); i++)
+				{
+					dropBullets[i].paint(mDC);
+				}
+				for (size_t i = 0; i < lifeitems.size(); i++)
+				{
+					lifeitems[i].paint(mDC);
+				}
 			}
 		}
 		
@@ -266,6 +287,14 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			
 			if (!isStart)
 			{
+				boards.clear();
+				enemies.clear();
+				dropBullets.clear();
+				lifeitems.clear();
+				Score = 0;
+				comboMessage = false;
+
+
 				life = 3;
 				yDiv = num;
 				xDiv = num;
@@ -287,7 +316,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				setRects(GameRect, boards, xDiv, yDiv, playerRect);
 				player = PLAYER(GameRect);
 				player.setRect(playerRect);
-				enemies.push_back(Enemy(boards[0][0].rect, boards[0][0]));
+				
 				
 
 				turnWhiterect = player.getAroundRect();
@@ -351,6 +380,9 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				yDiv = num;
 			}
 			break;
+		case ID_GAME_INVINCIBILITY:
+			invincible = !invincible;
+			break;
 		case ID_GAME_QUIT:
 			PostQuitMessage(0);
 			break;
@@ -404,7 +436,7 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	{
 		player.beforeRect = player.rect;
 		player.move();
-		player.collision(boards, GameRect,dropBullets);
+		player.collision(boards, GameRect,dropBullets,lifeitems);
 		
 		time = 0;
 	}
@@ -418,7 +450,7 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		if (!boardShakeManager.getWasShake())
 		{
 			boardShakeManager.setWasShake(true);
-			boardShakeManager.seq = BoardShakeManager::one;
+			boardShakeManager.update();
 		}
 		
 	}
@@ -439,7 +471,7 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 	int y = 0;
 	static double enemyTime = 0;
 	static double comboTime = 0;
-	comboTime += 0.005;
+	comboTime += 0.008;
 	enemyTime += 0.005;
 	if (enemyTime > 1)
 	{
@@ -472,7 +504,7 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 		{
 			enemies[i].move(player);
 
-			if (enemies[i].collision(player, bulletControl, boards,GameRect)) {
+			if (enemies[i].collision(player, bulletControl, boards,GameRect,invincible)) {
 				uniform_int_distribution<int> randomDrop{ 0,10000 };
 				int RD = randomDrop(mt);
 				RD %= 4;
@@ -484,7 +516,10 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 				
 				RECT aroundRect = enemies[i].getAroundRect();
 				Enemy* ene = &enemies[i];
-				
+				if (randomDrop(mt) % 20 == 0)
+				{
+					lifeitems.push_back(Lifeitem(enemies[i].getRect()));
+				}
 				for (size_t j = 0; j < enemies.size(); j++)
 				{
 					RECT temp;
@@ -502,7 +537,8 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 						break;
 					}
 				}
-				boardShakeManager.seq = BoardShakeManager::one;
+				boardShakeManager.update();
+				
 				if (comboTime<1)
 				{
 					Score += 200;
