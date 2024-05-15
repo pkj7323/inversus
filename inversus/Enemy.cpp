@@ -88,7 +88,7 @@ void Enemy::move(Player player)
 	
 }
 
-bool Enemy::collision(Player& player, BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect,bool invincibile)
+bool Enemy::collision(BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect)
 {
 	RECT temp;
 	POINT thisPos = { rect.left + (rect.right - rect.left) / 2,
@@ -113,13 +113,7 @@ bool Enemy::collision(Player& player, BulletControl& bulletControl, vector<vecto
 				}
 			}
 		}
-		if (!invincibile)
-		{
-			if (IntersectRect(&temp, &rect, &player.rect))
-			{
-				player.Death(gamerect);
-			}
-		}
+		
 		
 		vector<Bullet> bullets = bulletControl.getBullets();
 		for (size_t i = 0; i < bullets.size(); i++)

@@ -19,7 +19,8 @@ public:
 	void rotateBullet();
 	void setRect(RECT rect);
 	
-	void collision(vector<vector<Board>> board, RECT gameRect, vector<DropBullets>& dropbullets,vector<Lifeitem>& lifeitems);
+
+	void collision(vector<vector<Board>> board, RECT gameRect, vector<DropBullets>& dropbullets, vector<Lifeitem>& lifeitems, vector<Enemy>& enemies, bool invincibile);
 	void shoot();
 	int getBulletCount();
 	void shootCooltime();

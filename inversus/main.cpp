@@ -436,7 +436,7 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 	{
 		player.beforeRect = player.rect;
 		player.move();
-		player.collision(boards, GameRect,dropBullets,lifeitems);
+		player.collision(boards, GameRect,dropBullets,lifeitems,enemies,invincible);
 		
 		time = 0;
 	}
@@ -504,7 +504,7 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 		{
 			enemies[i].move(player);
 
-			if (enemies[i].collision(player, bulletControl, boards,GameRect,invincible)) {
+			if (enemies[i].collision(bulletControl, boards,GameRect)) {
 				uniform_int_distribution<int> randomDrop{ 0,10000 };
 				int RD = randomDrop(mt);
 				RD %= 4;

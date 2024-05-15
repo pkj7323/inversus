@@ -98,18 +98,40 @@ void Player::setRect(RECT rectsize)
 	rect.right = rectsize.right-2;
 	rect.bottom = rectsize.bottom-2;
 
-	AroundRect = RECT{ rect.left - (rectsize.right - rectsize.left) ,rect.top - (rectsize.bottom - rectsize.top),
-			rect.right + (rectsize.right - rectsize.left),rect.bottom + (rectsize.bottom - rectsize.top) };
+	AroundRect = RECT{ rect.left - (rectsize.right - rectsize.left)*2 ,rect.top - (rectsize.bottom - rectsize.top)*2,
+			rect.right + (rectsize.right - rectsize.left)*2,rect.bottom + (rectsize.bottom - rectsize.top)*2 };
 
 }
 
 
 
-void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBullets>& dropbullets,vector<Lifeitem>& lifeitems)
+void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBullets>& dropbullets,
+	vector<Lifeitem>& lifeitems,vector<Enemy>& enemies,bool invincibile)
 {
 	RECT temp;
 	if (isAlive)
 	{
+		if (!invincibile)
+		{
+			for (size_t i = 0; i < enemies.size(); i++)
+			{
+				RECT enemyRect = enemies[i].getRect();
+				if (IntersectRect(&temp, &rect, &enemyRect))
+				{
+					for (size_t j = 0; j < enemies.size(); j++)
+					{
+						RECT enemyRect2 = enemies[j].getRect();
+						if (IntersectRect(&temp,&AroundRect,&enemyRect2))
+						{
+							enemies.erase(enemies.begin() + j);
+						}
+					}
+					Death(gameRect);
+
+				}
+			}
+			
+		}
 		for (size_t i = 0; i < board.size(); i++)
 		{
 			for (size_t j = 0; j < board[i].size(); j++)
