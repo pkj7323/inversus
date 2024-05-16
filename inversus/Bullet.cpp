@@ -8,12 +8,18 @@ Bullet::Bullet()
 	bulletTailRect = RECT{ 0,0,0,0 };
 	bulletTailRect2 = RECT{ 0,0,0,0 };
 }
-Bullet::Bullet(Direction d)
+Bullet::Bullet(Direction d, bool special)
 {
-	
+	this->special = special;
 	dx = 0;
 	dy = 0;
 	direction = d;
+	if (special)
+	{
+		bulletColor = RGB(255, 1, 1);
+		bulletTailColor = RGB(210, 0, 0);
+		bulletTailColor2 = RGB(180, 0, 0);
+	}
 	switch (direction)
 	{
 	case Bullet::stop:
@@ -48,7 +54,6 @@ Bullet::Bullet(Direction d)
 		break;
 	}
 }
-
 bool Bullet::addBulletTime()
 {
 	bulletTimer += bulletTimerAccel;
@@ -105,7 +110,8 @@ void Bullet::paint(HDC hdc)
 	HPEN hPen, oldPen;
 	hBrush = CreateSolidBrush(bulletTailColor2);
 	oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-	
+	hPen = CreatePen(PS_NULL, 1, RGB(0, 0, 0));
+	oldPen = (HPEN)SelectObject(hdc, hPen);
 	Rectangle(hdc, bulletTailRect2.left, bulletTailRect2.top, bulletTailRect2.right, bulletTailRect2.bottom);
 	SelectObject(hdc, oldBrush);
 	DeleteObject(hBrush);
@@ -122,5 +128,12 @@ void Bullet::paint(HDC hdc)
 	SelectObject(hdc, oldBrush);
 	DeleteObject(hBrush);
 	
+	SelectObject(hdc, oldPen);
+	DeleteObject(hPen);
+}
+
+bool Bullet::getSpecial()
+{
+	return special;
 }
 

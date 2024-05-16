@@ -6,8 +6,13 @@ Enemy::Enemy()
 {
 	isAlive = true;
 }
-Enemy::Enemy(RECT rect, Board board)
+Enemy::Enemy(RECT rect, Board board,bool canBlock)
 {
+	this->canBlock = canBlock;
+	if (canBlock)
+	{
+		color = RGB(255, 255, 0);
+	}
 	setRect(rect, board);
 	isAlive = false;
 	spawnTime = 10;
@@ -48,12 +53,13 @@ void Enemy::setRect(RECT rect,Board board)
 		rect.right + (board.rect.right - board.rect.left),rect.bottom + (board.rect.bottom - board.rect.top) };
 }
 
-void Enemy::move(Player player)
+void Enemy::move(Player player,vector<vector<Board>> boards)
 {
 	POINT playerPos = { player.rect.left + (player.rect.right - player.rect.left) / 2,
 		player.rect.top + (player.rect.bottom - player.rect.top) / 2 };
 	POINT enemy = { rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2 };
 	POINT diff = { playerPos.x - enemy.x,playerPos.y - enemy.y };
+	RECT temp;
 	if (effect.getIsAlive())
 	{
 		effect.shrinkSize();
@@ -66,10 +72,39 @@ void Enemy::move(Player player)
 			{
 				OffsetRect(&rect, -5, 0);
 				OffsetRect(&AroundRect, -5, 0);
+				if (this->canBlock)
+				{
+					for (size_t i = 0; i < boards.size(); i++)
+					{
+						for (size_t j = 0; j < boards[i].size(); j++)
+						{
+							if (IntersectRect(&temp, &boards[i][j].rect, &rect) && boards[i][j].color == RGB(255, 0, 0))
+							{
+								OffsetRect(&rect, 5, 0);
+								OffsetRect(&AroundRect, 5, 0);
+							}
+						}
+					}
+				}
+				
 			}
 			else {
 				OffsetRect(&rect, 5, 0);
 				OffsetRect(&AroundRect, 5, 0);
+				if (this->canBlock)
+				{
+					for (size_t i = 0; i < boards.size(); i++)
+					{
+						for (size_t j = 0; j < boards[i].size(); j++)
+						{
+							if (IntersectRect(&temp, &boards[i][j].rect, &rect) && boards[i][j].color == RGB(255, 0, 0))
+							{
+								OffsetRect(&rect, -5, 0);
+								OffsetRect(&AroundRect, -5, 0);
+							}
+						}
+					}
+				}
 			}
 		}
 		else
@@ -78,17 +113,45 @@ void Enemy::move(Player player)
 			{
 				OffsetRect(&rect, 0, -5);
 				OffsetRect(&AroundRect, 0, -5);
+				if (this->canBlock)
+				{
+					for (size_t i = 0; i < boards.size(); i++)
+					{
+						for (size_t j = 0; j < boards[i].size(); j++)
+						{
+							if (IntersectRect(&temp, &boards[i][j].rect, &rect) && boards[i][j].color == RGB(255, 0, 0))
+							{
+								OffsetRect(&rect, 0, 5);
+								OffsetRect(&AroundRect, 0, 5);
+							}
+						}
+					}
+				}
 			}
 			else {
 				OffsetRect(&rect, 0, 5);
 				OffsetRect(&AroundRect, 0, 5);
+				if (this->canBlock)
+				{
+					for (size_t i = 0; i < boards.size(); i++)
+					{
+						for (size_t j = 0; j < boards[i].size(); j++)
+						{
+							if (IntersectRect(&temp, &boards[i][j].rect, &rect) && boards[i][j].color == RGB(255, 0, 0))
+							{
+								OffsetRect(&rect, 0, -5);
+								OffsetRect(&AroundRect, 0, -5);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 	
 }
 
-bool Enemy::collision(BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect)
+int Enemy::collision(BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect)
 {
 	RECT temp;
 	POINT thisPos = { rect.left + (rect.right - rect.left) / 2,
@@ -122,16 +185,25 @@ bool Enemy::collision(BulletControl& bulletControl, vector<vector<Board>>& board
 				|| IntersectRect(&temp, &rect, &bullets[i].bulletTailRect)
 				|| IntersectRect(&temp, &rect, &bullets[i].bulletTailRect2))
 			{
+				bool isSpecialBullet = bullets[i].getSpecial();
+				
 				bullets.erase(bullets.begin() + i);
 				bulletControl.setBullets(bullets);
 				Death(boards);
-				return true;
+				
+				if (isSpecialBullet)
+				{
+					return 2;
+				}
+				else {
+					return 1;
+				}
 
 			}
 		}
 	}
 	
-	return false;
+	return 0;
 
 }
 

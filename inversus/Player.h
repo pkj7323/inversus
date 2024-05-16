@@ -13,18 +13,15 @@ class Player
 public:
 	Player();
 	Player(RECT gameRect);
-	
 	void move();
 	void paint(HDC hdc);
 	void rotateBullet();
 	void setRect(RECT rect);
-	
-
 	void collision(vector<vector<Board>> board, RECT gameRect, vector<DropBullets>& dropbullets, vector<Lifeitem>& lifeitems, vector<Enemy>& enemies, bool invincibile);
 	void shoot();
 	int getBulletCount();
 	void shootCooltime();
-	void addBulletCount();
+	void addBulletCount(bool isSpecial);
 	void Death(RECT gamerect);
 	void setAroundRect(RECT AroundRect);
 	void setLife(int life);
@@ -34,6 +31,9 @@ public:
 	RECT getAroundRect();
 	bool playerSpawn(vector<Enemy>& enemies, vector<vector<Board>>& boards);
 	void playerSpawnEffect();
+	int getSpecialBulletCount();
+
+
 	RECT rect = {0,0,50,50};
 	RECT beforeRect = { 0,0,50,50 };
 	
@@ -43,11 +43,13 @@ public:
 	float speed = 0.7f;
 	bool L, R, T, B;
 private:
+	int bulletCountMax = 6;
 	Effect effect;
 	int life;
 	RECT AroundRect;
 	float coolTime = 10;
 	int bulletCount = 6;
+	int specialBulletCount = 0;
 	bool isAlive;
 };
 

@@ -79,7 +79,7 @@ void Player::paint(HDC hdc)
 	else {
 		effect.paint(hdc);
 	}
-	//Rectangle(hdc, AroundRect.left, AroundRect.top, AroundRect.right, AroundRect.bottom);
+	
 }
 
 void Player::rotateBullet()
@@ -153,10 +153,9 @@ void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBull
 			RECT DBRects = dropbullets[i].getRect();
 			if (IntersectRect(&temp, &DBRects, &rect))
 			{
-				for (size_t j = 0; j < dropbullets[i].getNum(); j++)
-				{
-					addBulletCount();
-				}
+				
+				addBulletCount(dropbullets[i].getSpecial());
+				
 				dropbullets.erase(dropbullets.begin() + i);
 				break;
 			}
@@ -199,14 +198,19 @@ void Player::shoot()
 			if (circles[i].wasShot == false)
 			{
 				circles[i].wasShot = true;
+				if (specialBulletCount>0)
+				{
+					specialBulletCount--;
+				}
+				else if (bulletCount > 0)
+				{
+					bulletCount--;
+				}
 				break;
 			}
 
 		}
-		if (bulletCount > 0)
-		{
-			bulletCount--;
-		}
+		
 	}
 	
 	
@@ -221,22 +225,28 @@ void Player::shootCooltime()
 {
 	if (coolTime<=0)
 	{
-		addBulletCount();
+		addBulletCount(false);
 		coolTime = 10;
 	}
 	coolTime -= 1;
 }
 
-void Player::addBulletCount()
+void Player::addBulletCount(bool isSpecial)
 {
-	if (bulletCount < 6)
+	if ( bulletCount < bulletCountMax && specialBulletCount<bulletCountMax-bulletCount)
 	{
 		
 		for (size_t i = 0; i < circles.size(); i++)
 		{
 			if (circles[i].wasShot == true)
 			{
-				bulletCount++;
+				if (isSpecial)
+				{
+					specialBulletCount++;
+				}
+				else {
+					bulletCount++;
+				}
 				circles[i].wasShot = false;
 				break;
 			}
@@ -306,10 +316,10 @@ bool Player::playerSpawn(vector<Enemy>& enemies,vector<vector<Board>>& boards)
 		else {
 			effect.setIsAlive(false);
 			isAlive = true;
-			
+			RECT temp;
 			for (size_t i = 0; i < enemies.size(); i++)
 			{
-				RECT temp;
+				
 				RECT enemyRect = enemies[i].getRect();
 				if (IntersectRect(&temp,&enemyRect,&AroundRect))
 				{
@@ -320,7 +330,7 @@ bool Player::playerSpawn(vector<Enemy>& enemies,vector<vector<Board>>& boards)
 			{
 				for (size_t j = 0; j < boards[i].size(); j++)
 				{
-					RECT temp;
+					
 					if (IntersectRect(&temp,&boards[i][j].rect,&AroundRect))
 					{
 						if (boards[i][j].color == RGB(0, 0, 0))
@@ -347,6 +357,11 @@ void Player::playerSpawnEffect()
 		effect.shrinkSize();
 	}
 	
+}
+
+int Player::getSpecialBulletCount()
+{
+	return specialBulletCount;
 }
 
 

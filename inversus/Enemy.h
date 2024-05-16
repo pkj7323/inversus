@@ -8,11 +8,11 @@ class Enemy
 {
 public:
 	Enemy();
-	Enemy(RECT rect, Board board);
+	Enemy(RECT rect, Board board,bool canBlock);
 	void paint(HDC hdc);
 	void setRect(RECT rect,Board board);
-	void move(Player player);
-	bool collision(BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect);
+	void move(Player player, vector<vector<Board>> boards);
+	int collision(BulletControl& bulletControl, vector<vector<Board>>& boards,RECT gamerect);
 	bool getIsAlive();
 	void setIsAlive(bool trigger);
 	RECT getRect();
@@ -20,6 +20,7 @@ public:
 	RECT getAroundRect();
 	Effect effect;
 private:
+	bool canBlock;
 	float spawnTime = 10;
 	RECT rect;
 	RECT AroundRect;

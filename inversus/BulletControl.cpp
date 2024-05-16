@@ -54,7 +54,7 @@ void BulletControl::shoot(int d,Player player)
 			dir = Bullet::stop;
 			break;
 		}
-		bullets.push_back(Bullet(dir));
+		player.getSpecialBulletCount() > 0 ? bullets.push_back(Bullet(dir, true)) : bullets.push_back(Bullet(dir,false));
 		Bullet* bullet = &bullets[bullets.size() - 1];
 		switch (dir)
 		{
@@ -138,8 +138,18 @@ bool BulletControl::BoardFor(vector<vector<Board>>& board, Bullet bulletI)
 				|| IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletTailRect) && board[i][j].color == RGB(0, 0, 0)
 				|| IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletTailRect2) && board[i][j].color == RGB(0, 0, 0))
 			{
+				
 				board[i][j].color = RGB(255, 255, 255);
 				return true;
+			}else if (bulletI.getSpecial())
+			{
+				if (IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletRect) && board[i][j].color == RGB(255, 0, 0)
+					|| IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletTailRect) && board[i][j].color == RGB(255, 0, 0)
+					|| IntersectRect(&rect, &board[i][j].rect, &bulletI.bulletTailRect2) && board[i][j].color == RGB(255, 0, 0))
+				{
+					board[i][j].color = RGB(255, 255, 255);
+					return true;
+				}
 			}
 		}
 	}

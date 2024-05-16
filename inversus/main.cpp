@@ -92,6 +92,8 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	HFONT hFont, oldFont;
 	static wstring str = TEXT("");
 	static wstring lifestr = TEXT("");
+	static wstring special = TEXT("");
+	static SIZE size;
 	static bool isPau = false, isStart = false;
 	switch (iMessage)
 	{
@@ -107,7 +109,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		mDC = CreateCompatibleDC(hDC);//메모리 dc만들기
 		hBitmap = CreateCompatibleBitmap(hDC, clientrect.right, clientrect.bottom);//메모리Dc와 연결할 비트맵 만들기
 		SelectObject(mDC, (HBITMAP)hBitmap);//메모리DC와 비트맵 연결
-
+		
 		if (isStart)
 		{
 			if (player.getLife() == 0)
@@ -155,6 +157,11 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				TextOutW(mDC, (clientrect.right - clientrect.left) / 2 - 120, 10, L"LIFE:", lstrlen(L"LIFE:"));
 				lifestr = to_wstring(player.getLife());
 				TextOutW(mDC, (clientrect.right - clientrect.left) / 2, clientrect.top + 10, lifestr.c_str(), lifestr.size());
+				special = L"SPECIAL:";
+				GetTextExtentPoint32W(mDC, special.c_str(), special.size(), &size);
+				TextOutW(mDC, clientrect.right - size.cx-50, 0, special.c_str(), special.size());
+				special = to_wstring(player.getSpecialBulletCount());
+				TextOutW(mDC, clientrect.right -50, 0, special.c_str(), special.size());
 				SelectObject(mDC, oldFont);
 				DeleteObject(hFont);
 				for (size_t i = 0; i < boards.size(); i++)
@@ -170,15 +177,25 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				{
 					enemies[i].paint(mDC);
 				}
-				for (size_t i = 0; i < dropBullets.size(); i++)
-				{
-					dropBullets[i].paint(mDC);
-				}
 				for (size_t i = 0; i < lifeitems.size(); i++)
 				{
 					lifeitems[i].paint(mDC);
 				}
+				for (size_t i = 0; i < dropBullets.size(); i++)
+				{
+					dropBullets[i].paint(mDC);
+				}
+				
 			}
+		}
+		else {
+			Rectangle(mDC, 0, 0, clientrect.right, clientrect.bottom);//메모리DC에 그리기
+			hFont = CreateFont(100, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+				CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("굴림체"));
+			oldFont = (HFONT)SelectObject(mDC, hFont);
+			DrawText(mDC, L"INVERSUS", lstrlen(L"INVERSUS"), &clientrect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			SelectObject(mDC, oldFont);
+			DeleteObject(hFont);
 		}
 		
 		
@@ -220,7 +237,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		
-		InvalidateRect(hWnd, NULL, false);
+		
 		break;
 	case WM_KEYUP:
 		switch (wParam)
@@ -453,13 +470,20 @@ void CALLBACK moveFunc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 			boardShakeManager.update();
 		}
 		
+		
+		
 	}
-	
+	if (player.getIsAlive())
+	{
+		SetTimer(hWnd, 5, 10, (TIMERPROC)EnemyMoveTimer);
+	}
+	else {
+		KillTimer(hWnd, 5);
+	}
 	static double effectTime = 0;
 	effectTime += 0.05;
 	if (effectTime>1)
 	{
-		
 		player.playerSpawnEffect();
 		effectTime = 0;
 	}
@@ -471,8 +495,9 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 	int y = 0;
 	static double enemyTime = 0;
 	static double comboTime = 0;
+	static double enemyTimeAccel = 0.005;
 	comboTime += 0.008;
-	enemyTime += 0.005;
+	enemyTime += enemyTimeAccel;
 	if (enemyTime > 1)
 	{
 		if (enemies.size() < 10)
@@ -490,8 +515,16 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 				}
 
 			}
-
-			enemies.push_back(Enemy(boards[y][x].rect, boards[y][x]));
+			uniform_int_distribution<int> random{ 0,100 };
+			if (random(mt) % 2 == 0)
+			{
+				enemies.push_back(Enemy(boards[y][x].rect, boards[y][x],false));
+			}
+			else {
+				enemies.push_back(Enemy(boards[y][x].rect, boards[y][x], true));
+			}
+			
+			enemyTimeAccel += 0.0005;
 		}
 
 		enemyTime = 0;
@@ -502,15 +535,22 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 	{
 		for (size_t i = 0; i < enemies.size(); i++)
 		{
-			enemies[i].move(player);
-
-			if (enemies[i].collision(bulletControl, boards,GameRect)) {
+			enemies[i].move(player,boards);
+			int col = enemies[i].collision(bulletControl, boards, GameRect);
+			if (col ==1|| col == 2) {
 				uniform_int_distribution<int> randomDrop{ 0,10000 };
 				int RD = randomDrop(mt);
 				RD %= 4;
 				for (size_t j = 0; j < RD; j++)
 				{
-					dropBullets.push_back(DropBullets(RD, enemies[i].getRect()));
+					if (randomDrop(mt)%100>49)
+					{
+						dropBullets.push_back(DropBullets(RD, enemies[i].getRect(), true));
+					}
+					else {
+						dropBullets.push_back(DropBullets(RD, enemies[i].getRect(), false));
+					}
+					
 				}
 				
 				
@@ -520,15 +560,28 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 				{
 					lifeitems.push_back(Lifeitem(enemies[i].getRect()));
 				}
-				for (size_t j = 0; j < enemies.size(); j++)
+				if (col == 2)
 				{
-					RECT temp;
-					RECT enemyRect = enemies[j].getRect();
-					if (IntersectRect(&temp, &aroundRect, &enemyRect) && ene != &enemies[j])
+					bool t = true;
+					while (t)
 					{
-						enemies.erase(enemies.begin() + j);
+						t = false;
+						for (size_t j = 0; j < enemies.size(); j++)
+						{
+							RECT temp;
+							RECT enemyRect = enemies[j].getRect();
+							if (IntersectRect(&temp, &aroundRect, &enemyRect) && ene != &enemies[j])
+							{
+								enemies.erase(enemies.begin() + j);
+								t = true;
+								break;
+							}
+						}
+
 					}
+					
 				}
+				
 				for (size_t j = 0; j < enemies.size(); j++)
 				{
 					if (ene==&enemies[j])
