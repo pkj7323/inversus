@@ -74,7 +74,7 @@ vector<Lifeitem> lifeitems;
 BoardShakeManager boardShakeManager;
 bool comboMessage = false;
 bool invincible = false;
-
+static double enemyTimeAccel = 0.005;
 LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 	HDC hDC, mDC;
@@ -310,7 +310,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				lifeitems.clear();
 				Score = 0;
 				comboMessage = false;
-
+				enemyTimeAccel = 0.005;
 
 				life = 3;
 				yDiv = num;
@@ -495,7 +495,7 @@ void CALLBACK EnemyMoveTimer(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime) {
 	int y = 0;
 	static double enemyTime = 0;
 	static double comboTime = 0;
-	static double enemyTimeAccel = 0.005;
+	
 	comboTime += 0.008;
 	enemyTime += enemyTimeAccel;
 	if (enemyTime > 1)
