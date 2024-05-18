@@ -14,6 +14,13 @@ void BulletControl::move()
 		}
 		
 	}
+	for (size_t i = 0; i < specialBullets.size(); i++)
+	{
+		if (specialBullets[i].addBulletTime())
+		{
+			specialBullets[i].move();
+		}
+	}
 }
 
 void BulletControl::paint(HDC hdc)
@@ -21,6 +28,10 @@ void BulletControl::paint(HDC hdc)
 	for (size_t i = 0; i < bullets.size(); i++)
 	{
 		bullets[i].paint(hdc);
+	}
+	for (size_t i = 0; i < specialBullets.size(); i++)
+	{
+		specialBullets[i].paint(hdc);
 	}
 	
 }
@@ -55,7 +66,9 @@ void BulletControl::shoot(int d,Player player)
 			break;
 		}
 		player.getSpecialBulletCount() > 0 ? bullets.push_back(Bullet(dir, true)) : bullets.push_back(Bullet(dir,false));
+
 		Bullet* bullet = &bullets[bullets.size() - 1];
+		
 		switch (dir)
 		{
 		case Bullet::L:
@@ -100,6 +113,28 @@ void BulletControl::shoot(int d,Player player)
 		default:
 			break;
 		}
+		if (bullet->getSpecial())
+		{
+			specialBullets.push_back(Bullet());
+			specialBullets[specialBullets.size() - 1].copyBullet(*bullet);
+			Bullet* specialBullet1 = &specialBullets[specialBullets.size() - 1];
+
+			specialBullets.push_back(Bullet());
+			specialBullets[specialBullets.size() - 1].copyBullet(*bullet);;
+			Bullet* specialBullet2 = &specialBullets[specialBullets.size() - 1];
+				
+			
+			if (bullet->direction==Bullet::L|| bullet->direction == Bullet::R)
+			{
+				specialBullet1->offsetRect(0, -20);
+				specialBullet2->offsetRect(0, 20);
+			}
+			else if (bullet->direction==Bullet::B|| bullet->direction == Bullet::T)
+			{
+				specialBullet1->offsetRect(-20, 0);
+				specialBullet2->offsetRect(20, 0);
+			}
+		}
 	}
 	else {
 		return;
@@ -124,6 +159,22 @@ void BulletControl::collision(vector<vector<Board>>& board, RECT gameRect)
 		{
 			
 			
+		}
+	}
+	for (size_t i = 0; i < specialBullets.size(); i++)
+	{
+		if (specialBullets[i].bulletRect.left<gameRect.left ||
+			specialBullets[i].bulletRect.top<gameRect.top ||
+			specialBullets[i].bulletRect.bottom>gameRect.bottom ||
+			specialBullets[i].bulletRect.right>gameRect.right)
+		{
+			specialBullets.erase(specialBullets.begin() + i);
+			break;
+		}
+		if (BoardFor(board, specialBullets[i]))
+		{
+
+
 		}
 	}
 }

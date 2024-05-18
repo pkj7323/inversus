@@ -8,6 +8,7 @@ Bullet::Bullet()
 	bulletTailRect = RECT{ 0,0,0,0 };
 	bulletTailRect2 = RECT{ 0,0,0,0 };
 }
+
 Bullet::Bullet(Direction d, bool special)
 {
 	this->special = special;
@@ -53,6 +54,27 @@ Bullet::Bullet(Direction d, bool special)
 		bulletTailRect2 = RECT{ 0,0,0,0 };
 		break;
 	}
+}
+void Bullet::copyBullet(Bullet origin) {
+	this->bulletColor = origin.bulletColor;
+	this->bulletTailColor = origin.bulletTailColor;
+	this->bulletTailColor2 = origin.bulletTailColor2;
+	this->bulletMoveSpeed = origin.bulletMoveSpeed;
+	this->bulletTimer = origin.bulletTimer;
+	this->bulletTimerAccel = origin.bulletTimerAccel;
+	this->direction = origin.direction;
+	this->dx = origin.dx;
+	this->dy = origin.dy;
+	this->special = origin.special;
+	this->bulletRect = origin.bulletRect;
+	this->bulletTailRect = origin.bulletTailRect;
+	this->bulletTailRect2 = origin.bulletTailRect2;
+}
+void Bullet::offsetRect(int dx, int dy)
+{
+	OffsetRect(&bulletRect, dx, dy);
+	OffsetRect(&bulletTailRect, dx, dy);
+	OffsetRect(&bulletTailRect2, dx, dy);
 }
 bool Bullet::addBulletTime()
 {

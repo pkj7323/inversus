@@ -116,19 +116,20 @@ void Player::collision(vector<vector<Board>> board,RECT gameRect,vector<DropBull
 			for (size_t i = 0; i < enemies.size(); i++)
 			{
 				RECT enemyRect = enemies[i].getRect();
-				if (IntersectRect(&temp, &rect, &enemyRect))
+				
+				if (IntersectRect(&temp, &rect, &enemyRect)&& enemies[i].getIsAlive())
 				{
 					for (size_t j = 0; j < enemies.size(); j++)
 					{
 						RECT enemyRect2 = enemies[j].getRect();
-						if (IntersectRect(&temp,&AroundRect,&enemyRect2))
+						if (IntersectRect(&temp, &AroundRect, &enemyRect2))
 						{
 							enemies.erase(enemies.begin() + j);
 						}
 					}
 					Death(gameRect);
-
 				}
+				
 			}
 			
 		}
@@ -243,6 +244,7 @@ void Player::addBulletCount(bool isSpecial)
 				if (isSpecial)
 				{
 					specialBulletCount++;
+					
 				}
 				else {
 					bulletCount++;
@@ -260,7 +262,7 @@ void Player::Death(RECT gamerect)
 	if (isAlive)
 	{
 		life--;
-
+		
 		OffsetRect(&rect, (gamerect.left + (gamerect.right - gamerect.left) / 2) - (rect.left + (rect.right - rect.left) / 2),
 			(gamerect.top + (gamerect.bottom - gamerect.top) / 2) - (rect.top + (rect.bottom - rect.top) / 2));
 		OffsetRect(&AroundRect, (gamerect.left + (gamerect.right - gamerect.left) / 2) - (AroundRect.left + (AroundRect.right - AroundRect.left) / 2),
@@ -268,6 +270,7 @@ void Player::Death(RECT gamerect)
 		isAlive = false;
 		effect.setIsAlive(true);
 		effect.setPos(POINT{ rect.left + (rect.right - rect.left) / 2,rect.top + (rect.bottom - rect.top) / 2 });
+		beforeRect = rect;
 	}
 	
 	//죽음 타이머 돌아가고 맵 가운데 생성 이펙트

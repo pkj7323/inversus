@@ -311,7 +311,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				Score = 0;
 				comboMessage = false;
 				enemyTimeAccel = 0.005;
-
+				bulletControl = BulletControl();
 				life = 3;
 				yDiv = num;
 				xDiv = num;

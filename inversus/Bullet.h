@@ -14,6 +14,8 @@ public:
 	virtual void move();
 	virtual void paint(HDC hdc);
 	bool getSpecial();
+	void copyBullet(Bullet bullet);
+	void offsetRect(int dx, int dy);
 	Direction direction = stop;
 	RECT bulletRect;
 	COLORREF bulletColor = RGB(0, 0, 0);
@@ -22,6 +24,7 @@ public:
 	RECT bulletTailRect2;
 	COLORREF bulletTailColor2 = RGB(80, 80, 80);
 private:
+	
 	bool special;
 	float bulletMoveSpeed = 4.5f;
 	float dx, dy;

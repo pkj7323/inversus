@@ -19,6 +19,7 @@ public:
 private:
 	
 	vector<Bullet> bullets;
+	vector<Bullet> specialBullets;
 	
 	Player player;
 };
